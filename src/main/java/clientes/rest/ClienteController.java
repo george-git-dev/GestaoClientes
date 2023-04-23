@@ -1,8 +1,7 @@
 package clientes.rest;
 
-
 import clientes.model.entity.Cliente;
-import clientes.repository.ClienteRepository;
+import clientes.model.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +12,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/clientes")
-@CrossOrigin("http://localhost:4200")
 public class ClienteController {
 
+    private final ClienteRepository repository;
+
     @Autowired
-    private ClienteRepository repository;
+    public ClienteController(ClienteRepository repository) {
+        this.repository = repository;
+    }
+
+    @GetMapping
+    public List<Cliente> obterTodos(){
+        return repository.findAll();
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -32,21 +39,16 @@ public class ClienteController {
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
     }
 
-    @GetMapping
-    public List<Cliente> obterTodos(){
-        return repository.findAll();
-    }
-
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletar( @PathVariable Integer id ){
         repository
-                .findById(id)
-                .map( cliente -> {
-                    repository.delete(cliente);
-                    return Void.TYPE;
-                })
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
+            .findById(id)
+            .map( cliente -> {
+                repository.delete(cliente);
+                return Void.TYPE;
+            })
+            .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
     }
 
     @PutMapping("{id}")
